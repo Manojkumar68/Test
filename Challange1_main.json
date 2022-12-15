@@ -1,0 +1,181 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "keyVaultName": {
+            "type": "string",
+            "metadata": {
+                "description": "Specifies the name of the key vault."
+            }
+        },
+        "RGGroup": {
+            "type": "string"
+        },
+        "newOrExistingKeyVault": {
+            "type": "string",
+            "allowedValues": [
+                "new",
+                "existing"
+            ],
+            "metadata": {
+                "description": "Specifies whether keyvault is new or existing."
+            }
+        },      
+        "enabledForDeployment": {
+            "type": "bool",
+            "allowedValues": [
+                true,
+                false
+            ],
+            "metadata": {
+                "description": "Specifies whether Azure Virtual Machines are permitted to retrieve certificates stored as secrets from the key vault."
+            }
+        },
+        "enabledForDiskEncryption": {
+            "type": "bool",
+            "allowedValues": [
+                true,
+                false
+            ],
+            "metadata": {
+                "description": "Specifies whether Azure Disk Encryption is permitted to retrieve secrets from the vault and unwrap keys."
+            }
+        },
+        "enabledForTemplateDeployment": {
+            "type": "bool",
+            "allowedValues": [
+                true,
+                false
+            ],
+            "metadata": {
+                "description": "Specifies whether Azure Resource Manager is permitted to retrieve secrets from the key vault."
+            }
+        },
+        "enableSoftDelete": {
+            "type": "bool"
+        },
+        "softDeleteRetentionInDays": {
+            "type": "int"
+        },
+        "enablePurgeProtection": {
+            "type": "bool"
+        },
+        "objectId": {
+            "type": "string"
+        },
+        "keysPermissions": {
+            "type": "array",
+            "metadata": {
+                "description": "Specifies the permissions to keys in the vault. Valid values are: all, encrypt, decrypt, wrapKey, unwrapKey, sign, verify, get, list, create, update, import, delete, backup, restore, recover, and purge."
+            }
+        },
+        "secretsPermissions": {
+            "type": "array",
+            "metadata": {
+                "description": "Specifies the permissions to secrets in the vault. Valid values are: all, get, list, set, delete, backup, restore, recover, and purge."
+            }
+        },
+        "skuName": {
+            "type": "string",
+            "allowedValues": [
+                "Standard",
+                "Premium"
+            ],
+            "metadata": {
+                "description": "Specifies whether the key vault is a standard vault or a premium vault."
+            }
+        },
+        "Host": {
+            "type": "string"
+        },
+        "Password": {
+            "type": "string"
+        },
+        "UserId": {
+            "type": "string"
+        }
+    },
+    "resources": [
+        {
+            "condition": "[equals(parameters('newOrExistingKeyVault'), 'new')]",
+            "type": "Microsoft.KeyVault/vaults",
+            "apiVersion": "2019-09-01",
+            "name": "[parameters('keyVaultName')]",
+            "location": "[resourceGroup().location]",
+            "properties": {
+                "enabledForDeployment": "[parameters('enabledForDeployment')]",
+                "enabledForDiskEncryption": "[parameters('enabledForDiskEncryption')]",
+                "enabledForTemplateDeployment": "[parameters('enabledForTemplateDeployment')]",
+                "enableSoftDelete": "[parameters('enableSoftDelete')]",
+                "softDeleteRetentionInDays": "[parameters('softDeleteRetentionInDays')]",
+                "enablePurgeProtection": "[parameters('enablePurgeProtection')]",
+                "tenantId": "[subscription().tenantId]",
+                "accessPolicies": [],
+                "sku": {
+                    "name": "[parameters('skuName')]",
+                    "family": "A"
+                },
+                "networkAcls": {
+                    "defaultAction": "Allow",
+                    "bypass": "AzureServices"
+                }
+            }
+        },
+        {
+            "type": "Microsoft.KeyVault/vaults/accessPolicies",
+            "name": "[concat(parameters('keyVaultName'), '/add')]",
+            "apiVersion": "2019-09-01",
+            "properties": {
+                "accessPolicies": [
+                    {
+                        "objectId": "[reference(resourceId('Microsoft.Logic/workflows', parameters($objectId)),'2019-05-01', 'full').identity.principalId]",
+                        "tenantId": "[subscription().tenantId]",
+                        "permissions": {
+                            "keys": "[parameters('keysPermissions')]",
+                            "secrets": "[parameters('secretsPermissions')]"
+                            
+                        }
+                    }
+
+                ]
+            },
+            "dependsOn": [
+                "[resourceId('Microsoft.KeyVault/vaults', parameters('keyVaultName'))]"
+            ]
+        },
+        
+        {
+            "type": "Microsoft.KeyVault/vaults/secrets",
+            "apiVersion": "2019-09-01",
+            "name": "[concat(parameters('keyVaultName'), '/Host')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.KeyVault/vaults', parameters('keyVaultName'))]"
+            ],
+            "properties": {
+                "value": "[parameters('Host')]"
+            }
+        },
+        {
+            "type": "Microsoft.KeyVault/vaults/secrets",
+            "apiVersion": "2019-09-01",
+            "name": "[concat(parameters('keyVaultName'), '/Password')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.KeyVault/vaults', parameters('keyVaultName'))]"
+            ],
+            "properties": {
+                "value": "[parameters('Password')]"
+            }
+        },
+        {
+            "type": "Microsoft.KeyVault/vaults/secrets",
+            "apiVersion": "2019-09-01",
+            "name": "[concat(parameters('keyVaultName'), '/UserId')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.KeyVault/vaults', parameters('keyVaultName'))]"
+            ],
+            "properties": {
+                "value": "[parameters('UserId')]"
+            }
+        }
+    ]
+}

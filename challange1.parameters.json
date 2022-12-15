@@ -1,0 +1,72 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentParameters.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "keyVaultName": {
+            "value": "Test"
+        },
+        "RGGroup": {
+            "value": "TEst_RG"
+        },
+        "newOrExistingKeyVault": {
+            "value": ""
+        },
+        "enabledForDeployment": {
+            "value": false
+        },
+        "enabledForDiskEncryption": {
+            "value": false
+        },
+        "enabledForTemplateDeployment": {
+            "value": true
+        },
+        "enableSoftDelete": {
+            "value": false
+        },
+        "softDeleteRetentionInDays": {
+            "value": 90
+        },
+        "enablePurgeProtection": {
+            "value": true
+        },
+        "sednaLogicAppName": {
+            "value": null
+        },
+        "keysPermissions": {
+            "value": [
+                "Get",
+                "List",
+                "Update",
+                "Create",
+                "Import",
+                "Delete",
+                "Recover",
+                "Backup",
+                "Restore"
+            ]
+        },
+        "secretsPermissions": {
+            "value": [
+                "Get",
+                "List",
+                "Set",
+                "Delete",
+                "Recover",
+                "Backup",
+                "Restore"
+            ]
+        },
+        "skuName": {
+            "value": "Standard"
+        },
+        "Host": {
+            "value": ""
+        },
+        "Password": {
+            "value": ""
+        },
+        "UserId": {
+            "value": ""
+        }
+    }
+}

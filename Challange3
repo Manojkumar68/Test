@@ -1,0 +1,28 @@
+#Get input array..
+$input = array("a" => array("b" => array("c" => "d")));
+#function ..
+function get_keyvalues($arr){
+ $keys =  $vals = "";
+  foreach ($arr as $key => $val) {
+    #Get keys list ...
+    if(is_array($val) || array_keys(array($val))){ 
+      $keys .= $key."/";
+      echo $keys;
+      get_keyvalues($val);
+    }
+    #Get values list....
+    if(!is_array($val)){
+       $vals .= $val;
+       echo "<br/>".$vals;
+    }
+  }
+  return;
+}
+
+#call function ..
+get_keyvalues($input);
+
+#output 
+#keys --- a/b/c/
+#values --d 
+ 
